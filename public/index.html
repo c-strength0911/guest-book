@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="ko">
 
@@ -141,68 +140,8 @@
     </header>
     <main>
       <ul class="guestbook__list">
-        <!-- 아래 li 태그부분은 샘플태그 입니다. 아래 태그를 재사용할 수 있도록 Templating을 적용하면 되겠쥬?
-                    그리고 아래의 li태그는 예시니까 지워야겠쥬???
-                -->
-        <li>
-          <article class="guestbook__article">
-            <div class="guestbook__author">시루떡 🍡</div>
-            <p class="guestbook__content">
-              오늘 정말 코딩하기 좋은 날씨다 ~~ 하하 🌞🌞<br>
-              오늘 정말 코딩하기 좋은 날씨다 ~~ 하하 🌞🌞<br>
-              오늘 정말 코딩하기 좋은 날씨다 ~~ 하하 🌞🌞<br>
-              오늘 정말 코딩하기 좋은 날씨다 ~~ 하하 🌞🌞<br>
-            </p>
-            <time class="guestbook__time">2020년 11월 11일 오후 2시 1분</time>
-          </article>
-        </li>
-        <li>
-          <article class="guestbook__article">
-            <div class="guestbook__author">시루떡 🍡</div>
-            <p class="guestbook__content">
-              오늘 정말 코딩하기 좋은 날씨다 ~~ 하하 🌞🌞
-            </p>
-            <time class="guestbook__time">2020년 11월 11일 오후 2시 1분</time>
-          </article>
-        </li>
-        <li>
-          <article class="guestbook__article">
-            <div class="guestbook__author">시루떡 🍡</div>
-            <p class="guestbook__content">
-              오늘 정말 코딩하기 좋은 날씨다 ~~ 하하 🌞🌞
-            </p>
-            <time class="guestbook__time">2020년 11월 11일 오후 2시 1분</time>
-          </article>
-        </li>
-        <li>
-          <article class="guestbook__article">
-            <div class="guestbook__author">시루떡 🍡</div>
-            <p class="guestbook__content">
-              오늘 정말 코딩하기 좋은 날씨다 ~~ 하하 🌞🌞
-            </p>
-            <time class="guestbook__time">2020년 11월 11일 오후 2시 1분</time>
-          </article>
-        </li>
-        <li>
-          <article class="guestbook__article">
-            <div class="guestbook__author">시루떡 🍡</div>
-            <p class="guestbook__content">
-              오늘 정말 코딩하기 좋은 날씨다 ~~ 하하 🌞🌞
-            </p>
-            <time class="guestbook__time">2020년 11월 11일 오후 2시 1분</time>
-          </article>
-        </li>
-        <li>
-          <article class="guestbook__article">
-            <div class="guestbook__author">시루떡 🍡</div>
-            <p class="guestbook__content">
-              오늘 정말 코딩하기 좋은 날씨다 ~~ 하하 🌞🌞
-            </p>
-            <time class="guestbook__time">2020년 11월 11일 오후 2시 1분</time>
-          </article>
-        </li>
       </ul>
-      <form class="guestbook__form">
+      <form method="POST" action="/create" class="guestbook__form">
         <h3 class="guestbook__title">📕방명록 작성</h3>
         <input type="text" name="name" placeholder="작성자이름" />
         <textarea name="content" placeholder="내용을 입력해주세요."></textarea>
@@ -213,15 +152,16 @@
   <!-- ✅ template태그 : http://www.tcpschool.com/html-tags/template -->
   <template id="guestbook-template">
     <li>
-      <article>
-        <h3>시루떡 🍡</h3>
-        <p>
-          오늘 정말 코딩하기 좋은 날씨다 ~~ 하하 🌞🌞
+      <article class="guestbook__article">
+        <div class="guestbook__author">{name}</div>
+        <p class="guestbook__content">
+          {content}
         </p>
-        <time>2020년 11월 11일 오후 2시 1분</time>
+        <time class="guestbook__time">{createAt}</time>
       </article>
     </li>
   </template>
+  <script src="/static/guestbook.js"></script>
 </body>
 
 </html>
