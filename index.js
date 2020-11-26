@@ -33,7 +33,7 @@ app.get("/join", function (req, res) {
 });
 
 app.post("/insert", function (req, res) {
-  var insertQuery = "INSERT INTO guestbook(name, content) VALUE(?,?)";
+  let insertQuery = "INSERT INTO guestbook(name, content) VALUE(?,?)";
   const { name, content } = req.body;
   connection.query(insertQuery, [name, content], (err) => {
     if (err) {
@@ -45,6 +45,8 @@ app.post("/insert", function (req, res) {
   });
 });
 
+app.get("comment/join", function (req, res) {});
+app.post("comment/insert", function (req, res) {});
 //app.post("/create", (req, res) => {});
 app.listen(8000, () => {
   console.log("OPEN");
