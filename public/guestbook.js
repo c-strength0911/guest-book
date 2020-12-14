@@ -32,6 +32,7 @@ guestbook__form.addEventListener("submit", (event) => {
   console.log("✅ ajax 요청");
 });
 
+<<<<<<< Updated upstream
 window.addEventListener("load", function (event) {
   xhr.open("get", "http://localhost:8000/join");
   xhr.onreadystatechange = () => {
@@ -40,3 +41,9 @@ window.addEventListener("load", function (event) {
     }
   };
 });
+=======
+window.addEventListener("DOMContentLoaded", () => {
+  fetchGuestbook();
+  guestbookForm.addEventListener("submit", submitGuestbook);
+});
+>>>>>>> Stashed changes
