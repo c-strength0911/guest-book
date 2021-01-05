@@ -2,28 +2,28 @@ const bodyParser = require("body-parser");
 const express = require("express");
 const morgan = require("morgan");
 const app = express();
-// const mysql = require("mysql");
+const mysql = require("mysql");
 const cors = require("cors");
-// const connection = mysql.createConnection({
-//   host: "localhost",
-//   port: 3306,
-//   user: "root",
-//   password: "1234",
-//   database: "test_db",
-// });
+const connection = mysql.createConnection({
+  host: "localhost",
+  port: 3306,
+  user: "root",
+  password: "1234",
+  database: "test_db",
+});
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use("/public", express.static("public"));
 app.use(cors());
 app.use(morgan("dev"));
-// connection.connect((err) => {
-//   if (err) {
-//     console.error(err.stack);
-//   } else {
-//     console.log("Connected to Mysql");
-//   }
-// });
+connection.connect((err) => {
+  if (err) {
+    console.error(err.stack);
+  } else {
+    console.log("Connected to Mysql");
+  }
+});
 
 function isCorrect(req, res, next) {
   const { name, content } = req.body;
@@ -33,15 +33,16 @@ function isCorrect(req, res, next) {
         isSuccess: false,
         message: "작성자 이름과 내용을 입력해 주세요",
       });
+      next();
     };
-  }
+  } else next();
 }
 
 app.get("/test", function (req, res) {
   res.json("test");
 });
 app.get("/join", function (req, res) {
-  // var sql = "SELECT * FROM guestbook ORDER BY id DESC";
+  var sql = "SELECT * FROM guestbook ORDER BY id DESC";
   connection.query(sql, function (err, rows, fields) {
     if (err) console.log("query is not excuted. select fail...\n" + err);
     else return res.json(rows);
@@ -49,7 +50,7 @@ app.get("/join", function (req, res) {
 });
 
 app.post("/insert", isCorrect, function (req, res) {
-  // let insertQuery = "INSERT INTO guestbook(name, content) VALUE(?,?)";
+  let insertQuery = "INSERT INTO guestbook(name, content) VALUE(?,?)";
   const { name, content } = req.body;
   connection.query(insertQuery, [name, content], (err) => {
     if (err) {
@@ -61,7 +62,7 @@ app.post("/insert", isCorrect, function (req, res) {
   });
 });
 app.post("/edit", isCorrect, (req, res) => {
-  // let insertQuery = "INSERT INTO guestbook(name, content) VALUE(?,?)";
+  let insertQuery = "INSERT INTO guestbook(name, content) VALUE(?,?)";
   const { name, content } = req.body;
   connection.query(insertQuery, [name, content], (err) => {
     if (err) {
@@ -75,7 +76,7 @@ app.post("/edit", isCorrect, (req, res) => {
 
 app.get("comment/join", function (req, res) {});
 app.post("comment/insert", function (req, res) {});
-//app.post("/create", (req, res) => {});
+// app.post("/create", (req, res) => {});
 app.listen(8000, () => {
   console.log("OPEN");
 });
