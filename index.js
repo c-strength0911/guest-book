@@ -28,15 +28,15 @@ connection.connect((err) => {
   }
 });
 
-// function isCorrect(req, res, next) {
-//   const { name, content } = req.body;
-//   if (!name.trim() || !content.trim()) {
-//     return () => {
-//       res.status(400).end();
-//       next();
-//     };
-//   } else next();
-// }
+function isCorrect(req, res) {
+  const { name, content } = req.body;
+  if (!name.trim() || !content.trim()) {
+    return () => {
+      res.status(400).end();
+      next();
+    };
+  } else next();
+}
 
 app.get("/test", (req, res) => {
   res.json("test");
@@ -62,7 +62,7 @@ app.post("/insert", (req, res) => {
   });
 });
 
-app.post("/delete", (req, res) => {
+app.delete("/delete", (req, res) => {
   let deleteQuery = "DELETE FROM guestbook WHERE id = (?)";
   const { id } = req.body;
   connection.query(deleteQuery, id, (err) => {
@@ -74,7 +74,7 @@ app.post("/delete", (req, res) => {
     }
   });
 });
-app.post("/edit", (req, res) => {
+app.patch("/edit", (req, res) => {
   const { content, id } = req.body;
   let editQuery = "UPDATE guestbook SET content = (?) WHERE id = (?)";
   connection.query(editQuery, [content, id], (err) => {
