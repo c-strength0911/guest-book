@@ -4,29 +4,29 @@ const morgan = require("morgan");
 const app = express();
 const mysql = require("mysql");
 const cors = require("cors");
-
+const stub = require("./public/stub.json");
 const PORT = 8000;
-
-const connection = mysql.createConnection({
-  host: "localhost",
-  port: 3306,
-  user: "root",
-  password: "1234",
-  database: "test_db",
-});
+// const connection = mysql.createConnection({
+//   host: "localhost",
+//   port: 3306,
+//   user: "root",
+//   password: "1234",
+//   database: "test_db",
+// });
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use("/public", express.static("public"));
 app.use(cors());
 app.use(morgan("dev"));
-connection.connect((err) => {
-  if (err) {
-    console.error(err.stack);
-  } else {
-    console.log("Connected to Mysql");
-  }
-});
+
+// connection.connect((err) => {
+//   if (err) {
+//     console.error(err.stack);
+//   } else {
+//     console.log("Connected to Mysql");
+//   }
+// });
 
 function isCorrect(req, res) {
   const { name, content } = req.body;
@@ -41,6 +41,7 @@ function isCorrect(req, res) {
 app.get("/test", (req, res) => {
   res.json("test");
 });
+
 app.get("/join", (req, res) => {
   var sql = "SELECT * FROM guestbook ORDER BY id DESC";
   connection.query(sql, function (err, rows, fields) {
@@ -51,7 +52,7 @@ app.get("/join", (req, res) => {
 
 app.post("/insert", (req, res) => {
   let insertQuery = "INSERT INTO guestbook(name, content) VALUE(?,?)";
-  const { name, content } = req.body;
+  const { name, content } = req.body; //중요
   connection.query(insertQuery, [name, content], (err) => {
     if (err) {
       console.log(err);
@@ -74,6 +75,7 @@ app.delete("/delete", (req, res) => {
     }
   });
 });
+
 app.patch("/edit", (req, res) => {
   const { content, id } = req.body;
   let editQuery = "UPDATE guestbook SET content = (?) WHERE id = (?)";
