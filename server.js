@@ -6,13 +6,13 @@ const mysql = require("mysql");
 const cors = require("cors");
 const stub = require("./public/stub.json");
 const PORT = 8000;
-// const connection = mysql.createConnection({
-//   host: "localhost",
-//   port: 3306,
-//   user: "root",
-//   password: "1234",
-//   database: "test_db",
-// });
+const connection = mysql.createConnection({
+  host: "localhost",
+  port: 3306,
+  user: "root",
+  password: "1234",
+  database: "test_db",
+});
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -20,13 +20,13 @@ app.use("/public", express.static("public"));
 app.use(cors());
 app.use(morgan("dev"));
 
-// connection.connect((err) => {
-//   if (err) {
-//     console.error(err.stack);
-//   } else {
-//     console.log("Connected to Mysql");
-//   }
-// });
+connection.connect((err) => {
+  if (err) {
+    console.error(err.stack);
+  } else {
+    console.log("Connected to Mysql");
+  }
+});
 
 function isCorrect(req, res) {
   const { name, content } = req.body;
@@ -53,6 +53,11 @@ app.get("/join", (req, res) => {
 app.post("/insert", (req, res) => {
   let insertQuery = "INSERT INTO guestbook(name, content) VALUE(?,?)";
   const { name, content } = req.body; //중요
+  if (!name.trim() || !content.trim()) {
+    return res
+      .status(400)
+      .json({ result: "fail", message: "옳바른 이름과 내용을 입력해 주세요" });
+  }
   connection.query(insertQuery, [name, content], (err) => {
     if (err) {
       console.log(err);
@@ -65,7 +70,11 @@ app.post("/insert", (req, res) => {
 
 app.delete("/delete", (req, res) => {
   let deleteQuery = "DELETE FROM guestbook WHERE id = (?)";
+  let selectIdQuery = "SELECT id FROM guestbook WHERE id=(?)";
   const { id } = req.body;
+  if (!id) {
+    return res.status(400).json({ result: "a" });
+  }
   connection.query(deleteQuery, id, (err) => {
     if (err) {
       console.log(err);
@@ -90,8 +99,10 @@ app.patch("/edit", (req, res) => {
 });
 
 app.get("comment/join", function (req, res) {});
-app.post("comment/insert", function (req, res) {});
-// app.post("/create", (req, res) => {});
+app.post("comment/insert", function (req, res) {
+  let insertQuery = "INSERT INTO guestbook_comment(video_ID, email) VALUE(?,?)";
+});
+
 app.listen(PORT, () => {
   console.log(`OPENED PORT : ${PORT}`);
 });
