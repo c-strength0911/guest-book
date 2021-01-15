@@ -43,8 +43,8 @@ app.get("/test", (req, res) => {
 });
 
 app.get("/join", (req, res) => {
-  var sql = "SELECT * FROM guestbook ORDER BY id DESC";
-  connection.query(sql, function (err, rows, fields) {
+  var checkQuery = "SELECT * FROM guestbook ORDER BY id DESC";
+  connection.query(checkQuery, function (err, rows, fields) {
     if (err) console.log("query is not excuted. select fail...\n" + err);
     else return res.json(rows);
   });
@@ -70,7 +70,6 @@ app.post("/insert", (req, res) => {
 
 app.delete("/delete", (req, res) => {
   let deleteQuery = "DELETE FROM guestbook WHERE id = (?)";
-  let selectIdQuery = "SELECT id FROM guestbook WHERE id=(?)";
   const { id } = req.body;
   if (!id) {
     return res.status(400).json({ result: "a" });
@@ -98,9 +97,21 @@ app.patch("/edit", (req, res) => {
   });
 });
 
-app.get("comment/join", function (req, res) {});
-app.post("comment/insert", function (req, res) {
+// app.get("/comment/join", function (req, res){
+//   const {}
+//   let checkQuery = "SELECT * FROM guestbook ORDER BY id DESC";
+// })
+app.post("/comment/insert", function (req, res) {
+  const { id, email } = req.body;
   let insertQuery = "INSERT INTO guestbook_comment(video_ID, email) VALUE(?,?)";
+  connection.query(insertQuery, [id, email], (err) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).json({ result: "fail" });
+    } else {
+      return res.status(200).json({ result: "success" });
+    }
+  });
 });
 
 app.listen(PORT, () => {
