@@ -101,6 +101,7 @@ app.patch("/edit", (req, res) => {
 //   const {}
 //   let checkQuery = "SELECT * FROM guestbook ORDER BY id DESC";
 // })
+
 app.post("/comment/insert", function (req, res) {
   const { id, email } = req.body;
   let insertQuery = "INSERT INTO guestbook_comment(video_ID, email) VALUE(?,?)";
