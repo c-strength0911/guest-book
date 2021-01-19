@@ -4,7 +4,7 @@ const morgan = require("morgan");
 const app = express();
 const mysql = require("mysql");
 const cors = require("cors");
-const stub = require("./public/stub.json");
+const { body, validationResult } = require("express-validator");
 const PORT = 8000;
 const connection = mysql.createConnection({
   host: "localhost",
@@ -28,16 +28,6 @@ connection.connect((err) => {
   }
 });
 
-function isCorrect(req, res) {
-  const { name, content } = req.body;
-  if (!name.trim() || !content.trim()) {
-    return () => {
-      res.status(400).end();
-      next();
-    };
-  } else next();
-}
-
 app.get("/test", (req, res) => {
   res.json("test");
 });
@@ -50,33 +40,43 @@ app.get("/join", (req, res) => {
   });
 });
 
-app.post("/insert", (req, res) => {
-  let insertQuery = "INSERT INTO guestbook(name, content) VALUE(?,?)";
-  const { name, content } = req.body; //중요
-  if (!name.trim() || !content.trim()) {
-    return res
-      .status(400)
-      .json({ result: "fail", message: "옳바른 이름과 내용을 입력해 주세요" });
-  }
-  connection.query(insertQuery, [name, content], (err) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json({ result: "fail" });
-    } else {
-      return res.status(200).json({ result: "success" });
+app.post(
+  "/insert",
+  body("name").trim().notEmpty().isLength({ min: 2 }),
+  body("content").trim().notEmpty().isLength({ min: 2 }),
+  (req, res) => {
+    let insertQuery = "INSERT INTO guestbook(name, content) VALUE(?,?)";
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        result: "fail",
+        errors: errors.array(),
+      });
     }
-  });
-});
-
-app.delete("/delete", (req, res) => {
-  let deleteQuery = "DELETE FROM guestbook WHERE id = (?)";
-  const { id } = req.body;
-  if (!id) {
-    return res.status(400).json({ result: "a" });
+    const { name, content } = req.body; //중요
+    connection.query(insertQuery, [name, content], (err) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ result: "fail" });
+      } else {
+        return res.status(200).json({ result: "success" });
+      }
+    });
   }
+);
+
+app.delete("/delete", body("id").trim().isNumeric(), (req, res) => {
+  let deleteQuery = "DELETE FROM guestbook WHERE id = (?)";
+  const errors = validationResult("req");
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      result: "fail",
+      errors: errors.array(),
+    });
+  }
+  const { id } = req.body;
   connection.query(deleteQuery, id, (err) => {
     if (err) {
-      console.log(err);
       return res.status(500).json({ result: "fail" });
     } else {
       return res.status(200).json({ result: "success" });

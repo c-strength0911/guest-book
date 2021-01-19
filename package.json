@@ -14,8 +14,10 @@
     "cors": "^2.8.5",
     "ejs": "^3.1.5",
     "express": "^4.17.1",
+    "express-validator": "^6.9.2",
     "morgan": "^1.10.0",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "validator": "^13.5.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.6"
