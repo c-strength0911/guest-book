@@ -39,13 +39,12 @@ app.get("/join", (req, res) => {
     else return res.json(rows);
   });
 });
-
+// .isLength({ min: 2 })
 app.post(
   "/insert",
   body("name").trim().notEmpty().isLength({ min: 2 }),
   body("content").trim().notEmpty().isLength({ min: 2 }),
   (req, res) => {
-    let insertQuery = "INSERT INTO guestbook(name, content) VALUE(?,?)";
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -53,6 +52,7 @@ app.post(
         errors: errors.array(),
       });
     }
+    let insertQuery = "INSERT INTO guestbook(name, content) VALUE(?,?)";
     const { name, content } = req.body; //중요
     connection.query(insertQuery, [name, content], (err) => {
       if (err) {
@@ -65,15 +65,15 @@ app.post(
   }
 );
 
-app.delete("/delete", body("id").trim().isNumeric(), (req, res) => {
-  let deleteQuery = "DELETE FROM guestbook WHERE id = (?)";
-  const errors = validationResult("req");
+app.delete("/delete", body("id").notEmpty().isInt(), (req, res) => {
+  const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
       result: "fail",
       errors: errors.array(),
     });
   }
+  let deleteQuery = "DELETE FROM guestbook WHERE id = (?)";
   const { id } = req.body;
   connection.query(deleteQuery, id, (err) => {
     if (err) {
@@ -84,9 +84,16 @@ app.delete("/delete", body("id").trim().isNumeric(), (req, res) => {
   });
 });
 
-app.patch("/edit", (req, res) => {
-  const { content, id } = req.body;
+app.patch("/edit", body("id").notEmpty().isInt(), (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      result: "fail",
+      errors: errors.array(),
+    });
+  }
   let editQuery = "UPDATE guestbook SET content = (?) WHERE id = (?)";
+  const { content, id } = req.body;
   connection.query(editQuery, [content, id], (err) => {
     if (err) {
       console.log(err);
@@ -102,18 +109,31 @@ app.patch("/edit", (req, res) => {
 //   let checkQuery = "SELECT * FROM guestbook ORDER BY id DESC";
 // })
 
-app.post("/comment/insert", function (req, res) {
-  const { id, email } = req.body;
-  let insertQuery = "INSERT INTO guestbook_comment(video_ID, email) VALUE(?,?)";
-  connection.query(insertQuery, [id, email], (err) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json({ result: "fail" });
-    } else {
-      return res.status(200).json({ result: "success" });
+app.post(
+  "/comment/insert",
+  body("guestbook_ID").trim().notEmpty().isLength({ min: 2 }),
+  body("comment_content").trim().notEmpty().isLength({ min: 2 }),
+  function (req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        result: "fail",
+        errors: errors.array(),
+      });
     }
-  });
-});
+    const { id, comment } = req.body;
+    let insertQuery =
+      "INSERT INTO guestbook_comment(guestbook_ID, comment_content) VALUE(?,?)";
+    connection.query(insertQuery, [id, comment], (err) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ result: "fail" });
+      } else {
+        return res.status(200).json({ result: "success" });
+      }
+    });
+  }
+);
 
 app.listen(PORT, () => {
   console.log(`OPENED PORT : ${PORT}`);
