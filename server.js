@@ -42,12 +42,14 @@ connection.connect((err) => {
 app.get("/test", (req, res) => {
   res.json("test");
 });
-// SELECT gb.id, gb.name ,gb.content, gbc.comment_ID, gbc.name, gbc.comment_content
+// SELECT gb.id, gb.name ,gb.content, gbc.comment_ID, gbc.comment_name, gbc.comment_content
 // FROM guestbook AS gb
 // LEFT JOIN guestbook_comment AS gbc
 // ON gbc.guestbook_ID = gb.id;
 app.get("/join", (req, res) => {
-  var checkQuery = "SELECT * FROM guestbook ORDER BY id DESC";
+  var checkQuery =
+    "SELECT gb.id, gb.name ,gb.content, gbc.comment_ID, gbc.comment_name, gbc.comment_content FROM guestbook AS gb LEFT JOIN guestbook_comment AS gbc ON gbc.guestbook_ID = gb.id";
+  var guestbook_rows, comment_rows;
   connection.query(checkQuery, function (err, rows, fields) {
     if (err) console.log("query is not excuted. select fail...\n" + err);
     else return res.json(rows);
@@ -120,7 +122,7 @@ app.get("/comment/join", function (req, res) {
 app.post(
   "/comment/insert",
   body("guestbook_ID").trim().notEmpty(),
-  body("name").trim().notEmpty().isLength({ min: 2 }),
+  body("comment_name").trim().notEmpty().isLength({ min: 2 }),
   body("comment_content").trim().notEmpty().isLength({ min: 2 }),
   function (req, res) {
     const errors = validationResult(req);
@@ -130,18 +132,22 @@ app.post(
         errors: errors.array(),
       });
     }
-    const { id, name, comment } = req.body;
-    console.log(id, name, comment);
+    const { guestbook_ID, comment_name, comment_content } = req.body;
+    console.log(guestbook_ID, comment_name, comment_content);
     let insertQuery =
-      "INSERT INTO guestbook_comment(guestbook_ID, name, comment_content) VALUE(?,?,?)";
-    connection.query(insertQuery, [id, name, comment], (err) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({ result: "fail" });
-      } else {
-        return res.status(200).json({ result: "success" });
+      "INSERT INTO guestbook_comment(guestbook_ID, comment_name, comment_content) VALUE(?,?,?)";
+    connection.query(
+      insertQuery,
+      [guestbook_ID, comment_name, comment_content],
+      (err) => {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ result: "fail" });
+        } else {
+          return res.status(200).json({ result: "success" });
+        }
       }
-    });
+    );
   }
 );
 
