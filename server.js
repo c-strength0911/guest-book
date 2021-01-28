@@ -20,6 +20,17 @@ app.use("/public", express.static("public"));
 app.use(cors());
 app.use(morgan("dev"));
 
+// function isCorrect(req, res, next) {
+//   const errors = validationResult(req);
+//   if (!errors.isEmpty()) {
+//     return res.status(400).json({
+//       result: "fail",
+//       errors: errors.array(),
+//     });
+//   }
+//   next();
+// }
+
 connection.connect((err) => {
   if (err) {
     console.error(err.stack);
@@ -31,7 +42,10 @@ connection.connect((err) => {
 app.get("/test", (req, res) => {
   res.json("test");
 });
-
+// SELECT gb.id, gb.name ,gb.content, gbc.comment_ID, gbc.name, gbc.comment_content
+// FROM guestbook AS gb
+// LEFT JOIN guestbook_comment AS gbc
+// ON gbc.guestbook_ID = gb.id;
 app.get("/join", (req, res) => {
   var checkQuery = "SELECT * FROM guestbook ORDER BY id DESC";
   connection.query(checkQuery, function (err, rows, fields) {
@@ -45,13 +59,6 @@ app.post(
   body("name").trim().notEmpty().isLength({ min: 2 }),
   body("content").trim().notEmpty().isLength({ min: 2 }),
   (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        result: "fail",
-        errors: errors.array(),
-      });
-    }
     let insertQuery = "INSERT INTO guestbook(name, content) VALUE(?,?)";
     const { name, content } = req.body; //중요
     connection.query(insertQuery, [name, content], (err) => {
@@ -104,14 +111,16 @@ app.patch("/edit", body("id").notEmpty().isInt(), (req, res) => {
   });
 });
 
-// app.get("/comment/join", function (req, res){
-//   const {}
-//   let checkQuery = "SELECT * FROM guestbook ORDER BY id DESC";
-// })
+app.get("/comment/join", function (req, res) {
+  const {} = req.body;
+
+  let checkQuery = "SELECT * FROM guestbook ORDER BY id DESC";
+});
 
 app.post(
   "/comment/insert",
-  body("guestbook_ID").trim().notEmpty().isLength({ min: 2 }),
+  body("guestbook_ID").trim().notEmpty(),
+  body("name").trim().notEmpty().isLength({ min: 2 }),
   body("comment_content").trim().notEmpty().isLength({ min: 2 }),
   function (req, res) {
     const errors = validationResult(req);
@@ -121,10 +130,11 @@ app.post(
         errors: errors.array(),
       });
     }
-    const { id, comment } = req.body;
+    const { id, name, comment } = req.body;
+    console.log(id, name, comment);
     let insertQuery =
-      "INSERT INTO guestbook_comment(guestbook_ID, comment_content) VALUE(?,?)";
-    connection.query(insertQuery, [id, comment], (err) => {
+      "INSERT INTO guestbook_comment(guestbook_ID, name, comment_content) VALUE(?,?,?)";
+    connection.query(insertQuery, [id, name, comment], (err) => {
       if (err) {
         console.log(err);
         return res.status(500).json({ result: "fail" });
