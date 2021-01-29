@@ -12,24 +12,13 @@ const connection = mysql.createConnection({
   user: "root",
   password: "1234",
   database: "test_db",
+  multipleStatements: true,
 });
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use("/public", express.static("public"));
 app.use(cors());
 app.use(morgan("dev"));
-
-// function isCorrect(req, res, next) {
-//   const errors = validationResult(req);
-//   if (!errors.isEmpty()) {
-//     return res.status(400).json({
-//       result: "fail",
-//       errors: errors.array(),
-//     });
-//   }
-//   next();
-// }
 
 connection.connect((err) => {
   if (err) {
@@ -42,20 +31,34 @@ connection.connect((err) => {
 app.get("/test", (req, res) => {
   res.json("test");
 });
-// SELECT gb.id, gb.name ,gb.content, gbc.comment_ID, gbc.comment_name, gbc.comment_content
-// FROM guestbook AS gb
-// LEFT JOIN guestbook_comment AS gbc
-// ON gbc.guestbook_ID = gb.id;
+
+//response는 2차원 배열로 반환되며
+//배열 0번째 행에는 guestbookCheckQuery(id, name, content, time)가 내림차순으로 값이 저장되어 있음
+//배열 1번째 행에는 commentCheckQuery(id, name, content, comment_ID, comment_name, comment_content)가 내림차순으로 값이 저장되어 있음
+app.get("/join-test", (req, res) => {
+  const guestbookCheckQuery = "SELECT * FROM guestbook ORDER BY time DESC;";
+  const commentCheckQuery =
+    "SELECT gb.id, gb.name, gb.content, gbc.comment_ID, gbc.comment_name, gbc.comment_content FROM guestbook AS gb LEFT JOIN guestbook_comment AS gbc ON gbc.guestbook_ID = gb.id ORDER BY gb.id DESC;";
+  connection.query(
+    guestbookCheckQuery + commentCheckQuery,
+    function (err, rows, fields) {
+      if (err) {
+        console.log("query is not excuted. select fail...\n" + err);
+        return res.status(500).json({ result: "fail" });
+      } else {
+        return res.status(200).json(rows);
+      }
+    }
+  );
+});
 app.get("/join", (req, res) => {
-  var checkQuery =
-    "SELECT gb.id, gb.name ,gb.content, gbc.comment_ID, gbc.comment_name, gbc.comment_content FROM guestbook AS gb LEFT JOIN guestbook_comment AS gbc ON gbc.guestbook_ID = gb.id";
-  var guestbook_rows, comment_rows;
+  var checkQuery = "SELECT * FROM guestbook ORDER BY id DESC";
   connection.query(checkQuery, function (err, rows, fields) {
     if (err) console.log("query is not excuted. select fail...\n" + err);
     else return res.json(rows);
   });
 });
-// .isLength({ min: 2 })
+
 app.post(
   "/insert",
   body("name").trim().notEmpty().isLength({ min: 2 }),
